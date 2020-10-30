@@ -25,7 +25,7 @@ router.post(
                 })
             }
             // receiving email and password from user in our req
-            // Basically checking whether we receiver email and password from the user or not.
+            // Basically checking whether we received email and password from the user or not.
             const { email, password } = req.body
             // email: email
             const candidate = await User.findOne({ email: email })
@@ -50,11 +50,47 @@ router.post(
     });
 
 // /api/auth/login
-router.post("/register", async (req, res) => {
+router.post("/register",
+    [
+        check("email", "Enter valid email").normalizeEmail().isEmail,
+        check("password", "Enter valid password").exists()
+    ],
+    async (req, res) => {
+        try {
+            // validationResult is checking email and password for their validity.
+            const errors = validationResult(req)
+            // stop post method in case of an error.
+            if (!errors.isEmpty()) {
+                return res.status(400).json({
+                    // Provide user with an array of errors.
+                    errors: errors.array(),
+                    message: "Invalid email or passowrd"
+                })
+            }
+            // receiving email and password from user in our req
+            // Basically checking whether we received email and password from the user or not.
+            const { email, password } = req.body
 
-});
+            const user = await User.findOne({ email })
+
+            if (!user) {
+                return res.status(400).json({ message: "User not found" })
+            }
+            // compare received password on front-end, with the password we have in our DB.
+            const isMatch = await bcrypt.compare(pasword, user.password)
+
+            if (!isMathc) {
+                return res.status(400).json({ message: "Invalid password" })
+            }
+
+        } catch (e) {
+            // 500 server error
+            res.status(500).json({ message: "Something went wrong, try again" })
+        }
+    });
 
 module.exports = router
 
 // 32:10 bcryptjs
 // 34:50
+// 43:55 STOPPED
