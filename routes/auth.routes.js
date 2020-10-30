@@ -1,5 +1,7 @@
 const { Router } = require("express");
 const bcrypt = require("bcrypt.js");
+const config = require("config");
+const jwt = require("jsonwebtoken");
 const { check, validationResult } = require("../models/User");
 const User = require("../models/User");
 const router = Router();
@@ -83,6 +85,16 @@ router.post("/register",
                 return res.status(400).json({ message: "Invalid password" })
             }
 
+            const token = jwt.sign(
+                { userId: user.id },
+                // taking secret code from ../config/default.json file
+                config.get("jwtSecret"),
+                { expiresIn: "1h" }
+            )
+
+            // provide user with token
+            res.json({ token, useId: user.id })
+
         } catch (e) {
             // 500 server error
             res.status(500).json({ message: "Something went wrong, try again" })
@@ -93,4 +105,10 @@ module.exports = router
 
 // 32:10 bcryptjs
 // 34:50
-// 43:55 STOPPED
+// 43:55 jsonwebtoken
+// 47:53 npx create-react-app client
+// 49:13
+// 51:07
+// 51:40
+// 54:05
+// 57:20
